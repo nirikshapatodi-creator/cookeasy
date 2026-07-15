@@ -1,0 +1,160 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>CookEasy — AI Recipe Generator</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+</head>
+
+<body>
+
+  <header class="header">
+
+    <div class="brand">
+
+      <span class="brand-icon">🍳</span>
+
+      <h1 class="brand-name">
+        Cook<span class="brand-accent">Easy</span>
+      </h1>
+
+    </div>
+
+    
+  </header>
+
+  <main class="hero">
+
+    <div class="hero-content">
+
+      <h2 class="hero-title">
+        What shall we cook <span class="accent-today">today</span>?
+      </h2>
+
+      <p class="hero-subtitle">
+        Enter ingredients you have or search for a dish.
+      </p>
+
+      <form class="search-form">
+
+        <div class="search-wrapper">
+
+          <span class="search-icon">🔍</span>
+
+          <input
+            type="text"
+            class="search-input"
+            id="ingredients"
+            placeholder="Search by dish name or ingredients..."
+          />
+
+        </div>
+
+        <div class="btn-row">
+
+          <button
+            type="button"
+            class="submit-btn"
+            onclick="generateRecipe()"
+          >
+            Let's Go!
+          </button>
+
+        </div>
+
+      </form>
+
+      <div id="output"></div>
+
+    </div>
+
+  </main>
+
+  <script>
+
+    async function generateRecipe() {
+
+      const ingredients =
+        document.getElementById("ingredients").value;
+
+      const output =
+        document.getElementById("output");
+
+      output.innerHTML = "⏳ Generating recipe...";
+
+      try {
+
+        const response = await fetch("/generate_recipe",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+              ingredients: ingredients
+            })
+
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.recipe) {
+
+          const formattedRecipe = data.recipe
+
+            .replace(/Recipe Name:/gi, "<b>Recipe Name:</b>")
+            .replace(/Ingredients:/gi, "<b>Ingredients:</b>")
+            .replace(/Steps:/gi, "<b>Steps:</b>")
+            .replace(/Instructions:/gi, "<b>Instructions:</b>")
+            .replace(/Cooking Tips:/gi, "<b>Cooking Tips:</b>");
+
+          output.innerHTML = `
+            <h3>🍽 Generated Recipe</h3>
+
+            <div class="recipe-text">
+              ${formattedRecipe}
+            </div>
+          `;
+
+        }
+
+        else {
+
+          output.innerHTML =
+            "❌ " + JSON.stringify(data.error);
+
+        }
+
+      }
+
+      catch (error) {
+
+        output.innerHTML =
+          "❌ Backend server not running";
+
+      }
+
+    }
+
+  </script>
+
+</body>
+</html>
